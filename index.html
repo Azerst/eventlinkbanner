@@ -18,10 +18,16 @@
 :root {
   --accent: #ff6a00;
   --accent2: #ff2d55;
-  --card: rgba(20,20,32,0.72);
+  --card: rgba(22, 22, 34, 0.94);
   --border: rgba(255,255,255,0.1);
   --text: #e8e8f0;
   --muted: #8a8aa0;
+}
+
+/* Chống nhảy layout khi scrollbar xuất hiện/biến mất (khi zoom) */
+html {
+  scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
 }
 
 html, body { min-height: 100%; }
@@ -36,40 +42,45 @@ body {
   letter-spacing: 0.3px;
 }
 
-/* ---------- Animated background ---------- */
+/* ============================================================
+   BACKGROUND — tối ưu: không filter blur, không box-shadow
+   Chỉ animate transform (GPU accelerated)
+============================================================ */
 .bg {
   position: fixed;
   inset: 0;
   overflow: hidden;
   z-index: 0;
   pointer-events: none;
-  filter: blur(0.3px);
 }
 
 .sq {
   position: absolute;
   background: linear-gradient(135deg, rgba(255,106,0,0.14), rgba(255,45,85,0.05));
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.07);
   animation: drift 25s infinite ease-in-out;
-  will-change: transform, border-radius;
-  box-shadow: 0 0 25px rgba(255,106,0,0.06);
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translate3d(0,0,0);
 }
 
 @keyframes drift {
-  0%   { transform: translate(0,0) scale(1) rotate(0deg);   border-radius: 15%; }
-  25%  { transform: translate(45px,-35px) scale(1.15) rotate(20deg);  border-radius: 45%; }
-  50%  { transform: translate(-35px,45px) scale(0.82) rotate(-15deg); border-radius: 50%; }
-  75%  { transform: translate(30px,25px) scale(1.12) rotate(28deg);   border-radius: 22%; }
-  100% { transform: translate(0,0) scale(1) rotate(0deg);   border-radius: 15%; }
+  0%, 100% { transform: translate3d(0,0,0)        scale(1)    rotate(0deg); }
+  25%      { transform: translate3d(45px,-35px,0)  scale(1.15) rotate(20deg); }
+  50%      { transform: translate3d(-35px,45px,0)  scale(0.82) rotate(-15deg); }
+  75%      { transform: translate3d(30px,25px,0)   scale(1.12) rotate(28deg); }
 }
 
-/* ---------- Layout ---------- */
+/* ============================================================
+   LAYOUT
+============================================================ */
 .app {
   position: relative;
   z-index: 1;
   max-width: 780px;
   margin: 0 auto;
   padding: 44px 20px 70px;
+  transform: translateZ(0); /* tạo GPU layer cho toàn app */
 }
 
 header { text-align: center; margin-bottom: 26px; }
@@ -83,7 +94,7 @@ h1 {
   color: transparent;
   animation: shine 5s linear infinite;
   letter-spacing: 1.5px;
-  filter: drop-shadow(0 4px 24px rgba(255,106,0,0.25));
+  /* ĐÃ BỎ filter: drop-shadow() — nguyên nhân chính gây giật khi zoom */
 }
 
 @keyframes shine { to { background-position: 300% center; } }
@@ -95,13 +106,13 @@ header p {
   letter-spacing: 1px;
 }
 
-/* ---------- Menu ---------- */
+/* ============================================================
+   MENU & CARD — BỎ backdrop-filter, dùng nền đặc
+============================================================ */
 .menu {
   display: flex;
   gap: 6px;
   background: var(--card);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 6px;
@@ -120,8 +131,8 @@ header p {
   font-size: 13px;
   letter-spacing: 1px;
   cursor: pointer;
-  transition: all 0.22s ease;
   white-space: nowrap;
+  transition: color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .menu button:hover { color: var(--text); background: rgba(255,255,255,0.05); }
@@ -133,19 +144,17 @@ header p {
 }
 
 /* ---------- Pages ---------- */
-.page { display: none; animation: fadeIn 0.35s ease; }
-.page.active { display: block; }
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.3s ease; }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ---------- Card ---------- */
 .card {
   background: var(--card);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
   border: 1px solid var(--border);
   border-radius: 22px;
   padding: 30px;
@@ -167,6 +176,7 @@ header p {
   text-transform: uppercase;
 }
 
+/* ---------- Form elements ---------- */
 .row { margin-bottom: 20px; }
 .row:last-child { margin-bottom: 0; }
 
@@ -191,7 +201,7 @@ select {
   font-family: inherit;
   font-size: 14px;
   outline: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 input:disabled {
@@ -204,7 +214,7 @@ input[type="number"]::-webkit-inner-spin-button { opacity: 0.5; }
 
 input:focus, select:focus {
   border-color: var(--accent);
-  background: rgba(255,106,0,0.07);
+  background-color: rgba(255,106,0,0.07);
   box-shadow: 0 0 0 3px rgba(255,106,0,0.14);
 }
 
@@ -225,8 +235,9 @@ select option { background: #17172a; color: var(--text); }
   font-family: inherit;
   font-size: 13.5px;
   cursor: pointer;
-  transition: all 0.2s ease;
   min-width: 44px;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+              color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .chips button:hover {
@@ -284,8 +295,8 @@ select option { background: #17172a; color: var(--text); }
   font-family: inherit;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
   letter-spacing: 1px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .btn-primary {
@@ -334,8 +345,8 @@ select option { background: #17172a; color: var(--text); }
   font-size: 12.5px;
   letter-spacing: 0.8px;
   cursor: pointer;
-  transition: all 0.2s ease;
   box-shadow: 0 6px 18px rgba(25,195,125,0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 .btn-save:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(25,195,125,0.5); }
 .btn-save:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
@@ -345,9 +356,7 @@ select option { background: #17172a; color: var(--text); }
   min-height: 160px;
   border-radius: 14px;
   border: 1px dashed var(--border);
-  background:
-    repeating-conic-gradient(rgba(255,255,255,0.02) 0% 25%, transparent 0% 50%)
-    50% / 20px 20px;
+  background: rgba(255,255,255,0.02);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -400,12 +409,13 @@ select option { background: #17172a; color: var(--text); }
   border-radius: 12px;
   font-size: 14px;
   opacity: 0;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 100;
   box-shadow: 0 12px 36px rgba(255,106,0,0.45);
   letter-spacing: 0.5px;
   max-width: 90vw;
   text-align: center;
+  will-change: transform, opacity;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
 }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
@@ -428,13 +438,12 @@ select option { background: #17172a; color: var(--text); }
     <p>Tạo &amp; chỉnh sửa link nhanh chóng</p>
   </header>
 
-  <!-- ============ MENU ============ -->
   <nav class="menu" id="menu">
     <button data-page="page-main" class="active">LINK THƯỜNG</button>
     <button data-page="page-bp">BOOYAH PASS</button>
   </nav>
 
-  <!-- ============ PAGE: LINK THƯỜNG ============ -->
+  <!-- ============ PAGE 1 ============ -->
   <div class="page active" id="page-main">
     <div class="card">
 
@@ -525,10 +534,9 @@ select option { background: #17172a; color: var(--text); }
     </div>
   </div>
 
-  <!-- ============ PAGE: BOOYAH PASS ============ -->
+  <!-- ============ PAGE 2 ============ -->
   <div class="page" id="page-bp">
 
-    <!-- ----- BP Link 1 ----- -->
     <div class="card">
       <div class="card-title">Booyah Pass — Gacha Lobby</div>
 
@@ -585,7 +593,6 @@ select option { background: #17172a; color: var(--text); }
       </div>
     </div>
 
-    <!-- ----- BP Link 2 ----- -->
     <div class="card">
       <div class="card-title">Booyah Pass — Title</div>
 
@@ -625,21 +632,23 @@ select option { background: #17172a; color: var(--text); }
 
 <script>
 /* ============================================================
-   BACKGROUND
+   BACKGROUND — giảm số ô, chỉ transform, border-radius tĩnh
 ============================================================ */
 (function generateBg() {
   const bg = document.getElementById('bg');
-  for (let i = 0; i < 38; i++) {
+  const count = 24; // giảm từ 38 → 24
+  for (let i = 0; i < count; i++) {
     const sq = document.createElement('div');
     sq.className = 'sq';
-    const s = 20 + Math.random() * 95;
+    const s = 25 + Math.random() * 110;
     sq.style.width  = s + 'px';
     sq.style.height = s + 'px';
     sq.style.left = (Math.random() * 100) + '%';
     sq.style.top  = (Math.random() * 100) + '%';
-    sq.style.animationDuration = (16 + Math.random() * 26) + 's';
+    sq.style.borderRadius = (10 + Math.random() * 50) + '%';
+    sq.style.animationDuration = (18 + Math.random() * 24) + 's';
     sq.style.animationDelay    = (-Math.random() * 45) + 's';
-    sq.style.opacity = (0.25 + Math.random() * 0.65).toFixed(2);
+    sq.style.opacity = (0.3 + Math.random() * 0.6).toFixed(2);
     bg.appendChild(sq);
   }
 })();
@@ -669,7 +678,7 @@ document.getElementById('menu').addEventListener('click', e => {
 });
 
 /* ============================================================
-   SANITIZER (chỉ giữ chữ + số)
+   SANITIZER
 ============================================================ */
 function attachSanitizer(input, onChange) {
   input.addEventListener('input', () => {
@@ -775,7 +784,7 @@ async function saveImage(url, filename, btn) {
 }
 
 /* ============================================================
-   HELPER — copy & open
+   COPY LINK
 ============================================================ */
 async function copyLink(url) {
   try {
@@ -793,10 +802,8 @@ async function copyLink(url) {
 }
 
 /* ============================================================
-   ============ PAGE 1 : LINK THƯỜNG ===========================
+   PAGE 1 : LINK THƯỜNG
 ============================================================ */
-
-/* --- chips --- */
 document.querySelectorAll('#page-main .chips').forEach(group => {
   group.addEventListener('click', e => {
     if (e.target.tagName !== 'BUTTON') return;
@@ -807,7 +814,6 @@ document.querySelectorAll('#page-main .chips').forEach(group => {
   });
 });
 
-/* --- get / build --- */
 function getMainParts() {
   return {
     sub:    document.querySelector('[data-group="sub"] .active').dataset.val,
@@ -834,7 +840,6 @@ function updateMain() {
     `<span class="hi2">${p.size}</span>`;
 }
 
-/* --- inputs --- */
 ['year','month','prefix','size'].forEach(id => {
   const el = document.getElementById(id);
   el.addEventListener('input',  () => { updateMain(); mainPreview.schedule(); });
@@ -846,7 +851,6 @@ attachSanitizer(document.getElementById('name'), () => {
   mainPreview.schedule();
 });
 
-/* --- previewer --- */
 const mainPreview = Previewer({
   img: 'previewImg',
   state: 'imgState',
@@ -860,15 +864,12 @@ const mainPreview = Previewer({
   errMsg: 'Không tìm thấy ảnh (404) — kiểm tra lại tên vật phẩm hoặc đường dẫn.'
 });
 
-/* --- buttons --- */
 document.getElementById('copy').addEventListener('click', () => copyLink(buildMainURL()));
 document.getElementById('open').addEventListener('click', () => window.open(buildMainURL(), '_blank'));
 
 /* ============================================================
-   ============ PAGE 2 : BOOYAH PASS ==========================
+   PAGE 2 : BOOYAH PASS
 ============================================================ */
-
-/* ---------- BP1 : Gacha Lobby ---------- */
 function getBP1Parts() {
   return {
     wheel: document.getElementById('bpWheel').value.trim(),
@@ -920,7 +921,7 @@ const bp1Preview = Previewer({
 document.getElementById('bpCopy').addEventListener('click', () => copyLink(buildBP1URL()));
 document.getElementById('bpOpen').addEventListener('click', () => window.open(buildBP1URL(), '_blank'));
 
-/* ---------- BP2 : Title ---------- */
+/* ---------- BP2 ---------- */
 function getBP2Parts() {
   return {
     year: (document.getElementById('bp2Year').value || '2026').trim(),

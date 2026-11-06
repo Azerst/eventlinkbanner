@@ -22,53 +22,65 @@
   --border: rgba(255,255,255,0.1);
   --text: #e8e8f0;
   --muted: #8a8aa0;
+  color-scheme: dark; /* tránh flash trắng lúc load */
 }
 
-/* Chống nhảy layout khi scrollbar xuất hiện/biến mất (khi zoom) */
+/* ============================================================
+   NỀN CỨNG — chống chớp trắng khi scroll
+   html: màu tối nhất làm fallback cuối cùng
+   body: màu tối trung gian
+   .bg : gradient cố định (không scroll theo)
+============================================================ */
 html {
+  background-color: #030308;
   scrollbar-gutter: stable;
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
-
-html, body { min-height: 100%; }
 
 body {
   font-family: "GFF-Latin-Bold", system-ui, -apple-system, sans-serif;
-  background: radial-gradient(ellipse at top, #1a0a20 0%, #06060c 55%, #030308 100%);
+  background-color: #06060c;
   color: var(--text);
   overflow-x: hidden;
   min-height: 100vh;
   position: relative;
   letter-spacing: 0.3px;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ============================================================
-   BACKGROUND — tối ưu: không filter blur, không box-shadow
-   Chỉ animate transform (GPU accelerated)
+   BACKGROUND — gradient cố định + ô vuông
+   contain: strict → cô lập hoàn toàn layout/paint của vùng nền
 ============================================================ */
 .bg {
   position: fixed;
   inset: 0;
-  overflow: hidden;
   z-index: 0;
+  overflow: hidden;
   pointer-events: none;
+  contain: strict;
+  background: radial-gradient(ellipse 100% 80% at 50% 0%,
+    #2a1535 0%, #100a18 45%, transparent 78%);
+  transform: translateZ(0);
 }
 
 .sq {
   position: absolute;
   background: linear-gradient(135deg, rgba(255,106,0,0.14), rgba(255,45,85,0.05));
-  border: 1px solid rgba(255,255,255,0.07);
-  animation: drift 25s infinite ease-in-out;
-  will-change: transform;
-  backface-visibility: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+  animation: drift 26s infinite ease-in-out;
   transform: translate3d(0,0,0);
+  backface-visibility: hidden;
+  /* KHÔNG dùng will-change trên từng ô → tránh tạo hàng chục GPU layer */
 }
 
 @keyframes drift {
   0%, 100% { transform: translate3d(0,0,0)        scale(1)    rotate(0deg); }
-  25%      { transform: translate3d(45px,-35px,0)  scale(1.15) rotate(20deg); }
-  50%      { transform: translate3d(-35px,45px,0)  scale(0.82) rotate(-15deg); }
-  75%      { transform: translate3d(30px,25px,0)   scale(1.12) rotate(28deg); }
+  25%      { transform: translate3d(30px,-24px,0)  scale(1.12) rotate(18deg); }
+  50%      { transform: translate3d(-24px,30px,0)  scale(0.85) rotate(-12deg); }
+  75%      { transform: translate3d(20px,18px,0)   scale(1.08) rotate(22deg); }
 }
 
 /* ============================================================
@@ -80,24 +92,23 @@ body {
   max-width: 780px;
   margin: 0 auto;
   padding: 44px 20px 70px;
-  transform: translateZ(0); /* tạo GPU layer cho toàn app */
+  transform: translateZ(0);
 }
 
 header { text-align: center; margin-bottom: 26px; }
 
 h1 {
   font-size: 34px;
-  background: linear-gradient(90deg, #ff6a00, #ff2d55, #ff8a3d, #ff2d55, #ff6a00);
-  background-size: 300% auto;
+  background: linear-gradient(90deg, #ff6a00, #ff2d55, #ff8a3d, #ff6a00);
+  background-size: 220% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: shine 5s linear infinite;
+  animation: shine 9s linear infinite; /* làm chậm → giảm 50% số lần repaint */
   letter-spacing: 1.5px;
-  /* ĐÃ BỎ filter: drop-shadow() — nguyên nhân chính gây giật khi zoom */
 }
 
-@keyframes shine { to { background-position: 300% center; } }
+@keyframes shine { to { background-position: 220% center; } }
 
 header p {
   color: var(--muted);
@@ -107,7 +118,7 @@ header p {
 }
 
 /* ============================================================
-   MENU & CARD — BỎ backdrop-filter, dùng nền đặc
+   MENU & CARD — contain: content cô lập repaint
 ============================================================ */
 .menu {
   display: flex;
@@ -118,6 +129,7 @@ header p {
   padding: 6px;
   margin-bottom: 20px;
   box-shadow: 0 14px 44px rgba(0,0,0,0.45);
+  contain: content;
 }
 
 .menu button {
@@ -143,13 +155,13 @@ header p {
   box-shadow: 0 6px 20px rgba(255,106,0,0.42);
 }
 
-/* ---------- Pages ---------- */
+/* ---------- Pages — fade chỉ opacity (không tạo layer mới) ---------- */
 .page { display: none; }
-.page.active { display: block; animation: fadeIn 0.3s ease; }
+.page.active { display: block; animation: fadeIn 0.25s ease; }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* ---------- Card ---------- */
@@ -160,6 +172,7 @@ header p {
   padding: 30px;
   box-shadow: 0 24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
   margin-bottom: 20px;
+  contain: content;
 }
 .card:last-child { margin-bottom: 0; }
 
@@ -176,7 +189,7 @@ header p {
   text-transform: uppercase;
 }
 
-/* ---------- Form elements ---------- */
+/* ---------- Form ---------- */
 .row { margin-bottom: 20px; }
 .row:last-child { margin-bottom: 0; }
 
@@ -362,6 +375,7 @@ select option { background: #17172a; color: var(--text); }
   justify-content: center;
   padding: 20px;
   overflow: hidden;
+  contain: content;
 }
 
 .img-frame img {
@@ -414,10 +428,19 @@ select option { background: #17172a; color: var(--text); }
   letter-spacing: 0.5px;
   max-width: 90vw;
   text-align: center;
-  will-change: transform, opacity;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
 }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .sq { animation: none; }
+  h1  { animation: none; }
+  .spinner { animation-duration: 1.6s; }
+  .page.active { animation: none; }
+}
 
 @media (max-width: 520px) {
   .card { padding: 22px; border-radius: 18px; }
@@ -632,23 +655,23 @@ select option { background: #17172a; color: var(--text); }
 
 <script>
 /* ============================================================
-   BACKGROUND — giảm số ô, chỉ transform, border-radius tĩnh
+   BACKGROUND — 12 ô (giảm từ 24) + không will-change từng ô
 ============================================================ */
 (function generateBg() {
   const bg = document.getElementById('bg');
-  const count = 24; // giảm từ 38 → 24
+  const count = 12;
   for (let i = 0; i < count; i++) {
     const sq = document.createElement('div');
     sq.className = 'sq';
-    const s = 25 + Math.random() * 110;
+    const s = 40 + Math.random() * 130;
     sq.style.width  = s + 'px';
     sq.style.height = s + 'px';
     sq.style.left = (Math.random() * 100) + '%';
     sq.style.top  = (Math.random() * 100) + '%';
     sq.style.borderRadius = (10 + Math.random() * 50) + '%';
-    sq.style.animationDuration = (18 + Math.random() * 24) + 's';
-    sq.style.animationDelay    = (-Math.random() * 45) + 's';
-    sq.style.opacity = (0.3 + Math.random() * 0.6).toFixed(2);
+    sq.style.animationDuration = (20 + Math.random() * 22) + 's';
+    sq.style.animationDelay    = (-Math.random() * 42) + 's';
+    sq.style.opacity = (0.35 + Math.random() * 0.55).toFixed(2);
     bg.appendChild(sq);
   }
 })();
@@ -666,7 +689,7 @@ function showToast(msg) {
 }
 
 /* ============================================================
-   MENU NAVIGATION
+   MENU
 ============================================================ */
 document.getElementById('menu').addEventListener('click', e => {
   const btn = e.target.closest('button[data-page]');
@@ -695,7 +718,7 @@ function attachSanitizer(input, onChange) {
 }
 
 /* ============================================================
-   GENERIC IMAGE PREVIEWER
+   PREVIEWER
 ============================================================ */
 function Previewer(cfg) {
   const img   = document.getElementById(cfg.img);
@@ -784,7 +807,7 @@ async function saveImage(url, filename, btn) {
 }
 
 /* ============================================================
-   COPY LINK
+   COPY
 ============================================================ */
 async function copyLink(url) {
   try {
@@ -802,7 +825,7 @@ async function copyLink(url) {
 }
 
 /* ============================================================
-   PAGE 1 : LINK THƯỜNG
+   PAGE 1
 ============================================================ */
 document.querySelectorAll('#page-main .chips').forEach(group => {
   group.addEventListener('click', e => {
@@ -868,7 +891,7 @@ document.getElementById('copy').addEventListener('click', () => copyLink(buildMa
 document.getElementById('open').addEventListener('click', () => window.open(buildMainURL(), '_blank'));
 
 /* ============================================================
-   PAGE 2 : BOOYAH PASS
+   PAGE 2
 ============================================================ */
 function getBP1Parts() {
   return {

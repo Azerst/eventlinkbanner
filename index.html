@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Fire Link Builder</title>
+<style>
+@font-face{
+  font-family:"GFF-Latin-Bold";
+  src:
+    url("https://dl.dir.freefiremobile.com/common/web_event/common/fonts/website/GFFLatinW05-Bold.woff2") format("woff2"),
+    url("https://dl.dir.freefiremobile.com/common/web_event/common/fonts/website/GFFLatinW05-Bold.woff") format("woff");
+  font-display: swap;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent: #ff6a00;
+  --accent2: #ff2d55;
+  --card: rgba(20,20,32,0.72);
+  --border: rgba(255,255,255,0.1);
+  --text: #e8e8f0;
+  --muted: #8a8aa0;
+}
+
+html, body { min-height: 100%; }
+
+body {
+  font-family: "GFF-Latin-Bold", system-ui, -apple-system, sans-serif;
+  background: radial-gradient(ellipse at top, #1a0a20 0%, #06060c 55%, #030308 100%);
+  color: var(--text);
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+  letter-spacing: 0.3px;
+}
+
+/* ---------- Animated background ---------- */
+.bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(0.3px);
+}
+
+.sq {
+  position: absolute;
+  background: linear-gradient(135deg, rgba(255,106,0,0.14), rgba(255,45,85,0.05));
+  border: 1px solid rgba(255,255,255,0.08);
+  animation: drift 25s infinite ease-in-out;
+  will-change: transform, border-radius;
+  box-shadow: 0 0 25px rgba(255,106,0,0.06);
+}
+
+@keyframes drift {
+  0%   { transform: translate(0,0) scale(1) rotate(0deg);   border-radius: 15%; }
+  25%  { transform: translate(45px,-35px) scale(1.15) rotate(20deg);  border-radius: 45%; }
+  50%  { transform: translate(-35px,45px) scale(0.82) rotate(-15deg); border-radius: 50%; }
+  75%  { transform: translate(30px,25px) scale(1.12) rotate(28deg);   border-radius: 22%; }
+  100% { transform: translate(0,0) scale(1) rotate(0deg);   border-radius: 15%; }
+}
+
+/* ---------- Layout ---------- */
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 44px 20px 70px;
+}
+
+header { text-align: center; margin-bottom: 26px; }
+
+h1 {
+  font-size: 34px;
+  background: linear-gradient(90deg, #ff6a00, #ff2d55, #ff8a3d, #ff2d55, #ff6a00);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 5s linear infinite;
+  letter-spacing: 1.5px;
+  filter: drop-shadow(0 4px 24px rgba(255,106,0,0.25));
+}
+
+@keyframes shine { to { background-position: 300% center; } }
+
+header p {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 10px;
+  letter-spacing: 1px;
+}
+
+/* ---------- Menu ---------- */
+.menu {
+  display: flex;
+  gap: 6px;
+  background: var(--card);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 6px;
+  margin-bottom: 20px;
+  box-shadow: 0 14px 44px rgba(0,0,0,0.45);
+}
+
+.menu button {
+  flex: 1;
+  padding: 13px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 11px;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  white-space: nowrap;
+}
+
+.menu button:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+.menu button.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(255,106,0,0.42);
+}
+
+/* ---------- Pages ---------- */
+.page { display: none; animation: fadeIn 0.35s ease; }
+.page.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Card ---------- */
+.card {
+  background: var(--card);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 30px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+  margin-bottom: 20px;
+}
+.card:last-child { margin-bottom: 0; }
+
+.card-title {
+  font-size: 14px;
+  letter-spacing: 1.2px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(90deg, #ff8a3d, #ff2d55);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-transform: uppercase;
+}
+
+.row { margin-bottom: 20px; }
+.row:last-child { margin-bottom: 0; }
+
+.row label {
+  display: block;
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-bottom: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 12px 15px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: rgba(255,255,255,0.02);
+}
+
+input[type="number"]::-webkit-inner-spin-button { opacity: 0.5; }
+
+input:focus, select:focus {
+  border-color: var(--accent);
+  background: rgba(255,106,0,0.07);
+  box-shadow: 0 0 0 3px rgba(255,106,0,0.14);
+}
+
+select { cursor: pointer; }
+select option { background: #17172a; color: var(--text); }
+
+.row2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.chips button {
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 44px;
+}
+
+.chips button:hover {
+  background: rgba(255,106,0,0.1);
+  border-color: rgba(255,106,0,0.45);
+  transform: translateY(-1px);
+}
+
+.chips button.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(255,106,0,0.42);
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+  opacity: 0.75;
+  letter-spacing: 0.5px;
+}
+
+/* ---------- Preview ---------- */
+.preview {
+  margin-top: 26px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.url-box {
+  background: rgba(0,0,0,0.45);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 15px 17px;
+  font-size: 13px;
+  color: #d8d8e8;
+  word-break: break-all;
+  line-height: 1.7;
+  margin-bottom: 14px;
+  min-height: 52px;
+  font-family: ui-monospace, "SF Mono", "Courier New", monospace;
+  letter-spacing: 0;
+}
+
+.url-box .hi  { color: #ff8a3d; }
+.url-box .hi2 { color: #4fe0a0; }
+
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+
+.btn {
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 1px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(255,106,0,0.38);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(255,106,0,0.55); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.12); }
+
+/* ---------- Image preview ---------- */
+.img-section {
+  margin-top: 26px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.img-section .head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.img-section .head span {
+  font-size: 11.5px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.btn-save {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #19c37d, #12a866);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 12.5px;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 18px rgba(25,195,125,0.35);
+}
+.btn-save:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(25,195,125,0.5); }
+.btn-save:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.img-frame {
+  position: relative;
+  min-height: 160px;
+  border-radius: 14px;
+  border: 1px dashed var(--border);
+  background:
+    repeating-conic-gradient(rgba(255,255,255,0.02) 0% 25%, transparent 0% 50%)
+    50% / 20px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.img-frame img {
+  max-width: 100%;
+  max-height: 320px;
+  border-radius: 8px;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+}
+.img-frame img.loaded { opacity: 1; }
+
+.img-state {
+  font-size: 12.5px;
+  color: var(--muted);
+  letter-spacing: 0.8px;
+  text-align: center;
+  line-height: 1.7;
+}
+.img-state.err { color: #ff6b6b; }
+
+.spinner {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,106,0,0.2);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+  margin-right: 10px;
+  display: inline-block;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120px);
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  padding: 13px 26px;
+  border-radius: 12px;
+  font-size: 14px;
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+  box-shadow: 0 12px 36px rgba(255,106,0,0.45);
+  letter-spacing: 0.5px;
+  max-width: 90vw;
+  text-align: center;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+@media (max-width: 520px) {
+  .card { padding: 22px; border-radius: 18px; }
+  h1 { font-size: 26px; }
+  .app { padding: 30px 14px 50px; }
+  .chips button { padding: 9px 13px; font-size: 13px; min-width: 40px; }
+  .menu button { font-size: 12px; padding: 12px 4px; }
+  .row3 { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="bg" id="bg"></div>
+
+<div class="app">
+  <header>
+    <h1>FREE FIRE LINK BUILDER</h1>
+    <p>Tạo &amp; chỉnh sửa link nhanh chóng</p>
+  </header>
+
+  <!-- ============ MENU ============ -->
+  <nav class="menu" id="menu">
+    <button data-page="page-main" class="active">LINK THƯỜNG</button>
+    <button data-page="page-bp">BOOYAH PASS</button>
+  </nav>
+
+  <!-- ============ PAGE: LINK THƯỜNG ============ -->
+  <div class="page active" id="page-main">
+    <div class="card">
+
+      <div class="row">
+        <label>Subdomain</label>
+        <div class="chips" data-group="sub">
+          <button data-val="gmc" class="active">gmc</button>
+          <button data-val="ak">ak</button>
+          <button data-val="aw">aw</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>Năm / Tháng</label>
+        <div class="row2">
+          <input type="number" id="year" value="2026" min="2020" max="2099">
+          <select id="month">
+            <option value="1">01</option><option value="2">02</option>
+            <option value="3">03</option><option value="4">04</option>
+            <option value="5">05</option><option value="6">06</option>
+            <option value="7">07</option><option value="8">08</option>
+            <option value="9">09</option><option value="10" selected>10</option>
+            <option value="11">11</option><option value="12">12</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>Vòng Quay</label>
+        <select id="prefix">
+          <option value="TW">TW — VQTO</option>
+          <option value="FW">FW — VQBM</option>
+          <option value="Moco">Moco</option>
+          <option value="TokenGacha">TokenGacha — VQMM</option>
+          <option value="TokenTower">TokenTower — VQ5BI</option>
+          <option value="WonderVault">WonderVault — VQKB</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label>Số vòng quay trong tháng</label>
+        <div class="chips" data-group="num">
+          <button data-val="" class="active">∅</button>
+          <button data-val="1">1</button><button data-val="2">2</button>
+          <button data-val="3">3</button><button data-val="4">4</button>
+          <button data-val="5">5</button><button data-val="6">6</button>
+          <button data-val="7">7</button><button data-val="8">8</button>
+          <button data-val="9">9</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>Tên Vật Phẩm</label>
+        <input type="text" id="name" value="InnerDevilBundle" placeholder="InnerDevilBundle">
+        <div class="hint">Tự động loại bỏ dấu cách, gạch ngang &amp; ký tự đặc biệt — chỉ giữ chữ và số.</div>
+      </div>
+
+      <div class="row">
+        <label>Kích thước ảnh</label>
+        <select id="size">
+          <option value="_436x606.png">_436x606.png</option>
+          <option value="_shoplobby_256x107.png">_shoplobby_256x107.png</option>
+          <option value="_bigshop_512x182.png">_bigshop_512x182.png</option>
+          <option value="_SmallShop_252x256.png">_SmallShop_252x256.png</option>
+        </select>
+      </div>
+
+      <div class="preview">
+        <label style="display:block;font-size:11.5px;color:var(--muted);margin-bottom:9px;letter-spacing:1px;text-transform:uppercase;">URL Preview</label>
+        <div class="url-box" id="url"></div>
+        <div class="actions">
+          <button class="btn btn-primary" id="copy">COPY LINK</button>
+          <button class="btn btn-secondary" id="open">MỞ LINK</button>
+        </div>
+      </div>
+
+      <div class="img-section">
+        <div class="head">
+          <span>Ảnh xem trước</span>
+          <button class="btn-save" id="save" disabled>⬇ LƯU VỀ</button>
+        </div>
+        <div class="img-frame">
+          <div class="img-state" id="imgState">Đang tải ảnh…</div>
+          <img id="previewImg" alt="preview" style="display:none;">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ PAGE: BOOYAH PASS ============ -->
+  <div class="page" id="page-bp">
+
+    <!-- ----- BP Link 1 ----- -->
+    <div class="card">
+      <div class="card-title">Booyah Pass — Gacha Lobby</div>
+
+      <div class="row">
+        <label>Tên Wheel</label>
+        <input type="text" id="bpWheel" value="FadedWheel5" placeholder="FadedWheel5">
+        <div class="hint">Tự động loại bỏ dấu cách &amp; ký tự đặc biệt.</div>
+      </div>
+
+      <div class="row">
+        <label>Ngày / Tháng / Năm</label>
+        <div class="row3">
+          <input type="text" id="bpDay" value="01" disabled>
+          <select id="bpMonth">
+            <option value="1">01</option><option value="2">02</option>
+            <option value="3">03</option><option value="4">04</option>
+            <option value="5">05</option><option value="6">06</option>
+            <option value="7">07</option><option value="8" selected>08</option>
+            <option value="9">09</option><option value="10">10</option>
+            <option value="11">11</option><option value="12">12</option>
+          </select>
+          <input type="number" id="bpYear" value="2026" min="2020" max="2099">
+        </div>
+        <div class="hint">Ngày cố định = 01.</div>
+      </div>
+
+      <div class="row">
+        <label>Loại</label>
+        <select id="bpType">
+          <option value="LobbyBG">LobbyBG</option>
+          <option value="Title">Title</option>
+          <option value="Tab">Tab</option>
+        </select>
+      </div>
+
+      <div class="preview">
+        <label style="display:block;font-size:11.5px;color:var(--muted);margin-bottom:9px;letter-spacing:1px;text-transform:uppercase;">URL Preview</label>
+        <div class="url-box" id="bpUrl"></div>
+        <div class="actions">
+          <button class="btn btn-primary" id="bpCopy">COPY LINK</button>
+          <button class="btn btn-secondary" id="bpOpen">MỞ LINK</button>
+        </div>
+      </div>
+
+      <div class="img-section">
+        <div class="head">
+          <span>Ảnh xem trước</span>
+          <button class="btn-save" id="bpSave" disabled>⬇ LƯU VỀ</button>
+        </div>
+        <div class="img-frame">
+          <div class="img-state" id="bpImgState">Đang tải ảnh…</div>
+          <img id="bpImg" alt="preview" style="display:none;">
+        </div>
+      </div>
+    </div>
+
+    <!-- ----- BP Link 2 ----- -->
+    <div class="card">
+      <div class="card-title">Booyah Pass — Title</div>
+
+      <div class="row">
+        <label>Năm / Số BP</label>
+        <div class="row2">
+          <input type="number" id="bp2Year" value="2026" min="2020" max="2099">
+          <input type="number" id="bp2Num" value="44" min="1" max="999" placeholder="44">
+        </div>
+      </div>
+
+      <div class="preview">
+        <label style="display:block;font-size:11.5px;color:var(--muted);margin-bottom:9px;letter-spacing:1px;text-transform:uppercase;">URL Preview</label>
+        <div class="url-box" id="bp2Url"></div>
+        <div class="actions">
+          <button class="btn btn-primary" id="bp2Copy">COPY LINK</button>
+          <button class="btn btn-secondary" id="bp2Open">MỞ LINK</button>
+        </div>
+      </div>
+
+      <div class="img-section">
+        <div class="head">
+          <span>Ảnh xem trước</span>
+          <button class="btn-save" id="bp2Save" disabled>⬇ LƯU VỀ</button>
+        </div>
+        <div class="img-frame">
+          <div class="img-state" id="bp2ImgState">Đang tải ảnh…</div>
+          <img id="bp2Img" alt="preview" style="display:none;">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast">Đã copy!</div>
+
+<script>
+/* ============================================================
+   BACKGROUND
+============================================================ */
+(function generateBg() {
+  const bg = document.getElementById('bg');
+  for (let i = 0; i < 38; i++) {
+    const sq = document.createElement('div');
+    sq.className = 'sq';
+    const s = 20 + Math.random() * 95;
+    sq.style.width  = s + 'px';
+    sq.style.height = s + 'px';
+    sq.style.left = (Math.random() * 100) + '%';
+    sq.style.top  = (Math.random() * 100) + '%';
+    sq.style.animationDuration = (16 + Math.random() * 26) + 's';
+    sq.style.animationDelay    = (-Math.random() * 45) + 's';
+    sq.style.opacity = (0.25 + Math.random() * 0.65).toFixed(2);
+    bg.appendChild(sq);
+  }
+})();
+
+/* ============================================================
+   TOAST
+============================================================ */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ============================================================
+   MENU NAVIGATION
+============================================================ */
+document.getElementById('menu').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-page]');
+  if (!btn) return;
+  document.querySelectorAll('#menu button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(btn.dataset.page).classList.add('active');
+});
+
+/* ============================================================
+   SANITIZER (chỉ giữ chữ + số)
+============================================================ */
+function attachSanitizer(input, onChange) {
+  input.addEventListener('input', () => {
+    const cursor = input.selectionStart;
+    const before = input.value;
+    const cleaned = before.replace(/[^a-zA-Z0-9]/g, '');
+    if (cleaned !== before) {
+      const newCursor = before.slice(0, cursor).replace(/[^a-zA-Z0-9]/g, '').length;
+      input.value = cleaned;
+      input.setSelectionRange(newCursor, newCursor);
+    }
+    onChange();
+  });
+}
+
+/* ============================================================
+   GENERIC IMAGE PREVIEWER
+============================================================ */
+function Previewer(cfg) {
+  const img   = document.getElementById(cfg.img);
+  const state = document.getElementById(cfg.state);
+  const btn   = document.getElementById(cfg.btn);
+
+  let timer = null;
+  let loadId = 0;
+
+  function setState(msg, isErr, loading) {
+    img.style.display = 'none';
+    img.classList.remove('loaded');
+    state.style.display = '';
+    state.className = 'img-state' + (isErr ? ' err' : '');
+    state.innerHTML = (loading ? '<span class="spinner"></span>' : '') + msg;
+    btn.disabled = true;
+  }
+
+  function load() {
+    const url = cfg.getUrl();
+    if (!url) {
+      setState(cfg.emptyMsg || 'Nhập thông tin để xem ảnh…', false, false);
+      return;
+    }
+    const myId = ++loadId;
+    setState('Đang tải ảnh…', false, true);
+    img.removeAttribute('src');
+
+    const tester = new Image();
+    tester.onload = () => {
+      if (myId !== loadId) return;
+      img.src = url;
+      img.style.display = '';
+      img.classList.add('loaded');
+      state.style.display = 'none';
+      btn.disabled = false;
+    };
+    tester.onerror = () => {
+      if (myId !== loadId) return;
+      setState(cfg.errMsg || 'Không tìm thấy ảnh — kiểm tra lại đường dẫn.', true, false);
+    };
+    tester.src = url;
+  }
+
+  function schedule() {
+    clearTimeout(timer);
+    timer = setTimeout(load, 500);
+  }
+
+  btn.addEventListener('click', () => {
+    const url = cfg.getUrl();
+    if (!url) return;
+    saveImage(url, cfg.getFilename(), btn);
+  });
+
+  return { load, schedule, setState };
+}
+
+/* ============================================================
+   SAVE IMAGE
+============================================================ */
+async function saveImage(url, filename, btn) {
+  const oldText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'ĐANG LƯU…';
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) throw new Error('fetch failed');
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    const objUrl = URL.createObjectURL(blob);
+    a.href = objUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(objUrl), 1500);
+    showToast('Đã lưu ảnh!');
+  } catch {
+    window.open(url, '_blank');
+    showToast('Đã mở ảnh — nhấp chuột phải để lưu');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = oldText;
+  }
+}
+
+/* ============================================================
+   HELPER — copy & open
+============================================================ */
+async function copyLink(url) {
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast('Đã copy link!');
+  } catch {
+    const tmp = document.createElement('textarea');
+    tmp.value = url;
+    document.body.appendChild(tmp);
+    tmp.select();
+    document.execCommand('copy');
+    tmp.remove();
+    showToast('Đã copy link!');
+  }
+}
+
+/* ============================================================
+   ============ PAGE 1 : LINK THƯỜNG ===========================
+============================================================ */
+
+/* --- chips --- */
+document.querySelectorAll('#page-main .chips').forEach(group => {
+  group.addEventListener('click', e => {
+    if (e.target.tagName !== 'BUTTON') return;
+    group.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    updateMain();
+    mainPreview.schedule();
+  });
+});
+
+/* --- get / build --- */
+function getMainParts() {
+  return {
+    sub:    document.querySelector('[data-group="sub"] .active').dataset.val,
+    year:   (document.getElementById('year').value || '2026').trim(),
+    month:  String(document.getElementById('month').value).padStart(2, '0'),
+    prefix: document.getElementById('prefix').value,
+    num:    document.querySelector('[data-group="num"] .active').dataset.val,
+    name:   document.getElementById('name').value.trim(),
+    size:   document.getElementById('size').value
+  };
+}
+
+function buildMainURL() {
+  const p = getMainParts();
+  return `https://dl.${p.sub}.freefiremobile.com/common/Local/VN/${p.year}/${p.month}/${p.prefix}${p.num}${p.name}${p.size}`;
+}
+
+function updateMain() {
+  const p = getMainParts();
+  document.getElementById('url').innerHTML =
+    `https://dl.<span class="hi">${p.sub}</span>.freefiremobile.com/common/Local/VN/` +
+    `<span class="hi2">${p.year}</span>/<span class="hi2">${p.month}</span>/` +
+    `<span class="hi">${p.prefix}${p.num}${p.name}</span>` +
+    `<span class="hi2">${p.size}</span>`;
+}
+
+/* --- inputs --- */
+['year','month','prefix','size'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input',  () => { updateMain(); mainPreview.schedule(); });
+  el.addEventListener('change', () => { updateMain(); mainPreview.schedule(); });
+});
+
+attachSanitizer(document.getElementById('name'), () => {
+  updateMain();
+  mainPreview.schedule();
+});
+
+/* --- previewer --- */
+const mainPreview = Previewer({
+  img: 'previewImg',
+  state: 'imgState',
+  btn: 'save',
+  getUrl: () => getMainParts().name ? buildMainURL() : '',
+  getFilename: () => {
+    const p = getMainParts();
+    return `${p.prefix}${p.num}${p.name}${p.size}`;
+  },
+  emptyMsg: 'Nhập tên vật phẩm để xem ảnh…',
+  errMsg: 'Không tìm thấy ảnh (404) — kiểm tra lại tên vật phẩm hoặc đường dẫn.'
+});
+
+/* --- buttons --- */
+document.getElementById('copy').addEventListener('click', () => copyLink(buildMainURL()));
+document.getElementById('open').addEventListener('click', () => window.open(buildMainURL(), '_blank'));
+
+/* ============================================================
+   ============ PAGE 2 : BOOYAH PASS ==========================
+============================================================ */
+
+/* ---------- BP1 : Gacha Lobby ---------- */
+function getBP1Parts() {
+  return {
+    wheel: document.getElementById('bpWheel').value.trim(),
+    year:  (document.getElementById('bpYear').value || '2026').trim(),
+    month: String(document.getElementById('bpMonth').value).padStart(2, '0'),
+    type:  document.getElementById('bpType').value
+  };
+}
+
+function buildBP1URL() {
+  const p = getBP1Parts();
+  return `https://dl.gmc.freefiremobile.com/common/OB50/CSH/gacha/` +
+         `${p.wheel}_${p.year}${p.month}01_BooyahPassPremium_${p.type}_VN_vn.png`;
+}
+
+function updateBP1() {
+  const p = getBP1Parts();
+  document.getElementById('bpUrl').innerHTML =
+    `https://dl.<span class="hi">gmc</span>.freefiremobile.com/common/OB50/CSH/gacha/` +
+    `<span class="hi">${p.wheel}</span>_` +
+    `<span class="hi2">${p.year}${p.month}01</span>_` +
+    `BooyahPassPremium_<span class="hi">${p.type}</span>_VN_vn.png`;
+}
+
+['bpMonth','bpYear','bpType'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input',  () => { updateBP1(); bp1Preview.schedule(); });
+  el.addEventListener('change', () => { updateBP1(); bp1Preview.schedule(); });
+});
+
+attachSanitizer(document.getElementById('bpWheel'), () => {
+  updateBP1();
+  bp1Preview.schedule();
+});
+
+const bp1Preview = Previewer({
+  img: 'bpImg',
+  state: 'bpImgState',
+  btn: 'bpSave',
+  getUrl: () => getBP1Parts().wheel ? buildBP1URL() : '',
+  getFilename: () => {
+    const p = getBP1Parts();
+    return `${p.wheel}_${p.year}${p.month}01_BooyahPassPremium_${p.type}_VN_vn.png`;
+  },
+  emptyMsg: 'Nhập tên Wheel để xem ảnh…',
+  errMsg: 'Không tìm thấy ảnh — kiểm tra lại tên Wheel / ngày tháng.'
+});
+
+document.getElementById('bpCopy').addEventListener('click', () => copyLink(buildBP1URL()));
+document.getElementById('bpOpen').addEventListener('click', () => window.open(buildBP1URL(), '_blank'));
+
+/* ---------- BP2 : Title ---------- */
+function getBP2Parts() {
+  return {
+    year: (document.getElementById('bp2Year').value || '2026').trim(),
+    num:  document.getElementById('bp2Num').value.trim()
+  };
+}
+
+function buildBP2URL() {
+  const p = getBP2Parts();
+  return `https://dl.cdn.freefiremobile.com/common/Local/VN/${p.year}/BP_Title/BPS${p.num}.png`;
+}
+
+function updateBP2() {
+  const p = getBP2Parts();
+  document.getElementById('bp2Url').innerHTML =
+    `https://dl.<span class="hi">cdn</span>.freefiremobile.com/common/Local/VN/` +
+    `<span class="hi2">${p.year}</span>/BP_Title/` +
+    `<span class="hi">BPS${p.num}</span>.png`;
+}
+
+['bp2Year','bp2Num'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input',  () => { updateBP2(); bp2Preview.schedule(); });
+  el.addEventListener('change', () => { updateBP2(); bp2Preview.schedule(); });
+});
+
+const bp2Preview = Previewer({
+  img: 'bp2Img',
+  state: 'bp2ImgState',
+  btn: 'bp2Save',
+  getUrl: () => getBP2Parts().num ? buildBP2URL() : '',
+  getFilename: () => `BPS${getBP2Parts().num}.png`,
+  emptyMsg: 'Nhập số BP để xem ảnh…',
+  errMsg: 'Không tìm thấy ảnh — kiểm tra lại số BP / năm.'
+});
+
+document.getElementById('bp2Copy').addEventListener('click', () => copyLink(buildBP2URL()));
+document.getElementById('bp2Open').addEventListener('click', () => window.open(buildBP2URL(), '_blank'));
+
+/* ============================================================
+   INIT
+============================================================ */
+updateMain();
+updateBP1();
+updateBP2();
+
+mainPreview.load();
+bp1Preview.load();
+bp2Preview.load();
+</script>
+</body>
+</html>
